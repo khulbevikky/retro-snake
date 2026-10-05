@@ -46,7 +46,7 @@ jobs:
       - name: Bind Ebitengine Game AAR
         run: |
           mkdir -p android/app/libs
-          ebitenmobile bind -target android -javapkg com.retrosnake -o android/app/libs/game.aar .
+          ebitenmobile bind -target android -javapkg com.retrosnake -o android/app/libs/game.aar ./mobile
 
       - name: Build Android APK with Gradle
         working-directory: ./android
