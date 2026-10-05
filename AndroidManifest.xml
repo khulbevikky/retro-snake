@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.golang.todo.retrosnake"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <application
+        android:label="Retro Snake"
+        android:allowBackup="true"
+        android:hasCode="false">
+        <activity
+            android:name="android.app.NativeActivity"
+            android:label="Retro Snake"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="retrosnake" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+

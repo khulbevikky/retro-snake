@@ -1,0 +1,16 @@
+# Binaries
+*.apk
+*.aab
+*.exe
+retro-snake
+retro-snake-bin
+
+# High scores local config
+highscores.json
+
+# OS / Editor files
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
