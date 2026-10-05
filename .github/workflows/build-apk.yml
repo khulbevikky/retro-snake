@@ -25,23 +25,32 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK and SDK Components
+      - name: Configure Android SDK and NDK
         run: |
-          sdkmanager --install "ndk;26.1.10909125" "platforms;android-34" "build-tools;34.0.0"
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          # Use pre-installed NDK on the GitHub Actions runner
+          NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$NDK_DIR" ]; then
+            echo "Installing NDK via sdkmanager..."
+            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk-bundle" "platforms;android-34" "build-tools;34.0.0"
+            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | sort -V | tail -n 1)
+          fi
+          echo "Using Android NDK: $NDK_DIR"
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
 
-      - name: Install Go Mobile
+      - name: Install and Initialize Go Mobile
         run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Init gomobile
+        run: |
           gomobile init
 
       - name: Build Android APK
         run: |
-          export ANDROID_HOME=$ANDROID_SDK_ROOT
-          export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125
           gomobile build -target=android -androidapi 34 -o retro-snake.apk .
 
       - name: Upload APK Artifact
@@ -49,4 +58,3 @@ jobs:
         with:
           name: retro-snake
           path: retro-snake.apk
-
