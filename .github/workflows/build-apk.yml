@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: 'stable'
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -28,13 +28,9 @@ jobs:
       - name: Configure Android SDK and NDK
         run: |
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          # Select stable NDK 26.x / 27.x LTS
           NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/26.* 2>/dev/null | tail -n 1)
           if [ -z "$NDK_DIR" ]; then
             NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/27.* 2>/dev/null | tail -n 1)
-          fi
-          if [ -z "$NDK_DIR" ]; then
-            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/25.* 2>/dev/null | tail -n 1)
           fi
           if [ -z "$NDK_DIR" ]; then
             NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | tail -n 1)
@@ -42,26 +38,23 @@ jobs:
           echo "Using Android NDK: $NDK_DIR"
           echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
 
-      - name: Install Ebitengine Go Mobile
+      - name: Install ebitenmobile
         run: |
-          go install github.com/ebitengine/gomobile/cmd/gomobile@latest
-          go install github.com/ebitengine/gomobile/cmd/gobind@latest
+          go install github.com/hajimehoshi/ebiten/v2/cmd/ebitenmobile@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-      - name: Init gomobile
+      - name: Bind Ebitengine Game AAR
         run: |
-          gomobile init
+          mkdir -p android/app/libs
+          ebitenmobile bind -target android -javapkg com.retrosnake -o android/app/libs/game.aar .
 
-      - name: Fetch Dependencies
+      - name: Build Android APK with Gradle
+        working-directory: ./android
         run: |
-          go mod tidy
-
-      - name: Build Android APK
-        run: |
-          gomobile build -target=android -androidapi 34 -o retro-snake.apk .
+          gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: retro-snake
-          path: retro-snake.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
