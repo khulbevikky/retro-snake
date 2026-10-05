@@ -28,30 +28,32 @@ jobs:
       - name: Configure Android SDK and NDK
         run: |
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          # Use pre-installed NDK on the GitHub Actions runner
-          NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | sort -V | tail -n 1)
+          # Select stable NDK 26.x / 27.x LTS
+          NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/26.* 2>/dev/null | tail -n 1)
           if [ -z "$NDK_DIR" ]; then
-            echo "Installing NDK via sdkmanager..."
-            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
-            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk-bundle" "platforms;android-34" "build-tools;34.0.0"
-            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | sort -V | tail -n 1)
+            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/27.* 2>/dev/null | tail -n 1)
+          fi
+          if [ -z "$NDK_DIR" ]; then
+            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/25.* 2>/dev/null | tail -n 1)
+          fi
+          if [ -z "$NDK_DIR" ]; then
+            NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | tail -n 1)
           fi
           echo "Using Android NDK: $NDK_DIR"
           echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
 
-      - name: Install and Initialize Go Mobile
+      - name: Install Ebitengine Go Mobile
         run: |
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          go install golang.org/x/mobile/cmd/gobind@latest
+          go install github.com/ebitengine/gomobile/cmd/gomobile@latest
+          go install github.com/ebitengine/gomobile/cmd/gobind@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Init gomobile
         run: |
           gomobile init
 
-      - name: Fetch Mobile Dependencies
+      - name: Fetch Dependencies
         run: |
-          go get golang.org/x/mobile/app@latest
           go mod tidy
 
       - name: Build Android APK
@@ -63,4 +65,3 @@ jobs:
         with:
           name: retro-snake
           path: retro-snake.apk
-
