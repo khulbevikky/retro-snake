@@ -49,6 +49,11 @@ jobs:
         run: |
           gomobile init
 
+      - name: Fetch Mobile Dependencies
+        run: |
+          go get golang.org/x/mobile/app@latest
+          go mod tidy
+
       - name: Build Android APK
         run: |
           gomobile build -target=android -androidapi 34 -o retro-snake.apk .

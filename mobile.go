@@ -3,6 +3,8 @@
 package main
 
 import (
+	_ "golang.org/x/mobile/app"
+
 	"github.com/hajimehoshi/ebiten/v2/mobile"
 )
 

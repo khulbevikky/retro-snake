@@ -1,6 +1,6 @@
 module retro-snake
 
-go 1.25.0
+go 1.22.0
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.10.4
